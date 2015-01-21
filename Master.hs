@@ -20,12 +20,16 @@ trial n exe0 exe1 = do
     IF.terminate talker1
     return results
 
-showResults :: (String,String) -> [(A.Action, A.Action)] -> String
-showResults (p0,p1) rs = let
+points :: [(A.Action, A.Action)] -> (Int, Int)
+points rs = (p0,p1) where
     firsts = map fst rs
     seconds = map snd rs
-    point0 = sum $ zipWith result firsts seconds
-    point1 = sum $ zipWith (flip result) firsts seconds
+    p0 = sum $ zipWith result firsts seconds
+    p1 = sum $ zipWith (flip result) firsts seconds
+
+showResults :: (String,String) -> [(A.Action, A.Action)] -> String
+showResults (p0,p1) rs = let
+    (point0, point1) = points rs
     winner = case compare point0 point1 of
             GT -> p0
             LT -> p1

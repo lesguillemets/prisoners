@@ -4,4 +4,4 @@ shortShow :: Action -> String
 shortShow Betray = "B"
 shortShow Coop = "C"
 
-type Result = Integer
+type Result = Int
