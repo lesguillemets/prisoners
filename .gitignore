@@ -1,0 +1,6 @@
+.*.sw[p-s]
+*.hi
+*.o
+talk.*
+talk
+Master
