@@ -9,7 +9,7 @@ main = do
     args <- getArgs
     let p0 = head args
     let p1 = head . tail $ args
-    trial 50 p0 p1 >>= putStrLn . showResults (p0,p1)
+    trial 100 p0 p1 >>= putStrLn . showResults (p0,p1)
 
 trial :: Int -> String -> String -> IO [(A.Action,A.Action)]
 trial n exe0 exe1 = do
@@ -32,8 +32,8 @@ showResults (p0,p1) rs = let
             _ -> "DRAW"
     in
         unlines [
-                unwords . map (A.shortShow . fst) $ rs,
-                unwords . map (A.shortShow . snd) $ rs,
+                concatMap (A.shortShow . fst) rs,
+                concatMap (A.shortShow . snd) rs,
                 show point0 ++ " vs " ++ show point1,
                 "winner : " ++ winner
                 ]
