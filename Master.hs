@@ -1,12 +1,12 @@
 import Control.Applicative
 import Control.Monad
 import qualified Data.Array as DA
-import Data.Array ((//), (!))
 import qualified System.Directory as SD
 
 import qualified Action as A
 import qualified Interface as IF
 import ExeUtil (getExecutables)
+import Display (display, showPlayers)
 
 binPath :: FilePath
 binPath = "./players/"
@@ -16,7 +16,8 @@ rounds = 200 :: Int
 main = do
     players <- getExecutables binPath
     result <- roundRobin rounds players
-    print result
+    putStrLn . showPlayers $ players
+    putStrLn . display $ result
 
 roundRobin :: Int -> [FilePath] -> IO (DA.Array (Int,Int) Double)
 roundRobin n players = do
