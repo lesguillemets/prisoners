@@ -18,7 +18,7 @@ main = do
     result <- roundRobin rounds players
     print result
 
-roundRobin :: Int -> [FilePath] -> IO (DA.Array (Int,Int) Int)
+roundRobin :: Int -> [FilePath] -> IO (DA.Array (Int,Int) Double)
 roundRobin n players = do
     let
         nP = length players
@@ -28,7 +28,10 @@ roundRobin n players = do
             return $ scores res
         f (i,j) = do
             thisScore <- battle i j
-            return [((i,j), fst thisScore), ((j,i), snd thisScore)]
+            return [
+                   ((i,j), fromIntegral (fst thisScore) / fromIntegral rounds),
+                   ((j,i), fromIntegral (snd thisScore) / fromIntegral rounds)
+                   ]
     resl <- concat <$> mapM f battles
     return $ DA.array ((0,0), (nP-1,nP-1)) resl
 
