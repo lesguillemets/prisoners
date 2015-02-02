@@ -9,13 +9,12 @@ import qualified Interface as IF
 import ExeUtil (getExecutables)
 
 binPath :: FilePath
-binPath = "./players"
+binPath = "./players/"
 
 rounds = 200 :: Int
 
 main = do
     players <- getExecutables binPath
-    SD.setCurrentDirectory binPath
     result <- roundRobin rounds players
     print result
 
@@ -25,7 +24,7 @@ roundRobin n players = do
         nP = length players
         battles = [(i,j) | i <- [0..nP-1], j <- [i..nP-1]]
         battle i j = do
-            res <- trial n (players!!i) (players!!j)
+            res <- trial n (binPath ++ players!!i) (binPath ++ players!!j)
             return $ scores res
         f (i,j) = do
             thisScore <- battle i j
