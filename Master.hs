@@ -1,17 +1,39 @@
 import Control.Applicative
-import Control.Monad (replicateM)
-import System.Environment (getArgs)
+import Control.Monad
+import qualified Data.Array as DA
+import Data.Array ((//), (!))
+import qualified System.Directory as SD
 
 import qualified Action as A
 import qualified Interface as IF
+import ExeUtil (getExecutables)
+
+binPath :: FilePath
+binPath = "./players"
+
+rounds = 200 :: Int
 
 main = do
-    args <- getArgs
-    let p0 = head args
-    let p1 = head . tail $ args
-    trial 100 p0 p1 >>= putStrLn . showResults (p0,p1)
+    players <- getExecutables binPath
+    SD.setCurrentDirectory binPath
+    result <- roundRobin rounds players
+    print result
 
-trial :: Int -> String -> String -> IO [(A.Action,A.Action)]
+roundRobin :: Int -> [FilePath] -> IO (DA.Array (Int,Int) Int)
+roundRobin n players = do
+    let
+        nP = length players
+        battles = [(i,j) | i <- [0..nP-1], j <- [i..nP-1]]
+        battle i j = do
+            res <- trial n (players!!i) (players!!j)
+            return $ scores res
+        f (i,j) = do
+            thisScore <- battle i j
+            return [((i,j), fst thisScore), ((j,i), snd thisScore)]
+    resl <- concat <$> mapM f battles
+    return $ DA.array ((0,0), (nP-1,nP-1)) resl
+
+trial :: Int -> FilePath -> FilePath -> IO [(A.Action,A.Action)]
 trial n exe0 exe1 = do
     talker0 <- IF.spawn exe0
     talker1 <- IF.spawn exe1
@@ -20,17 +42,17 @@ trial n exe0 exe1 = do
     IF.terminate talker1
     return results
 
-points :: [(A.Action, A.Action)] -> (Int, Int)
-points rs = (p0,p1) where
+scores :: [(A.Action, A.Action)] -> (Int, Int)
+scores rs = (p0,p1) where
     firsts = map fst rs
     seconds = map snd rs
-    p0 = sum $ zipWith result firsts seconds
-    p1 = sum $ zipWith (flip result) firsts seconds
+    p0 = sum $ zipWith score firsts seconds
+    p1 = sum $ zipWith (flip score) firsts seconds
 
 showResults :: (String,String) -> [(A.Action, A.Action)] -> String
 showResults (p0,p1) rs = let
-    (point0, point1) = points rs
-    winner = case compare point0 point1 of
+    (score0, score1) = scores rs
+    winner = case compare score0 score1 of
             GT -> p0
             LT -> p1
             _ -> "DRAW"
@@ -38,7 +60,7 @@ showResults (p0,p1) rs = let
         unlines [
                 concatMap (A.shortShow . fst) rs,
                 concatMap (A.shortShow . snd) rs,
-                show point0 ++ " vs " ++ show point1,
+                show score0 ++ " vs " ++ show score1,
                 "winner : " ++ winner
                 ]
 
@@ -50,10 +72,9 @@ turn t0 t1 = do
     IF.talk t1 $ show nextAction0
     return (nextAction0, nextAction1)
 
-
-result :: A.Action -> A.Action -> A.Result
--- result me other
-result A.Betray A.Betray = 1
-result A.Coop A.Coop = 3
-result A.Betray A.Coop = 5
-result A.Coop A.Betray = 0
+score :: A.Action -> A.Action -> A.Score
+-- score me other
+score A.Betray A.Betray = 1
+score A.Coop A.Coop = 3
+score A.Betray A.Coop = 5
+score A.Coop A.Betray = 0
