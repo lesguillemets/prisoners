@@ -17,4 +17,3 @@ loop g = do
 p :: Bool -> String
 p True = "Coop"
 p False = "Betray"
-
