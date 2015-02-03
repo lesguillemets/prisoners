@@ -1,6 +1,7 @@
 import Control.Applicative
 import Control.Monad
 import qualified Data.Array as DA
+import Data.List (sort)
 import qualified System.Directory as SD
 
 import qualified Action as A
@@ -14,7 +15,7 @@ binPath = "./players/"
 rounds = 200 :: Int
 
 main = do
-    players <- getExecutables binPath
+    players <- sort <$> getExecutables binPath
     result <- roundRobin rounds players
     putStrLn . showPlayers $ players
     putStrLn . display $ result
