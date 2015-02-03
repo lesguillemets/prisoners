@@ -12,7 +12,7 @@ import Display (display, showPlayers)
 binPath :: FilePath
 binPath = "./players/"
 
-rounds = 200 :: Int
+rounds = 1000 :: Int
 
 main = do
     players <- sort <$> getExecutables binPath
