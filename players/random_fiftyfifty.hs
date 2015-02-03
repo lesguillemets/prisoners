@@ -8,7 +8,11 @@ main = do
     loop gen
 
 loop :: (RandomGen g) => g -> IO()
-loop = mapM_ (putStrLn . p) . randomRs (True,False)
+loop g = do
+    let (b,ng) = randomR (True,False) g
+    putStrLn . p $ b
+    _ <- getLine
+    loop ng
 
 p :: Bool -> String
 p True = "Coop"
